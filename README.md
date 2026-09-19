@@ -125,11 +125,10 @@ HealthConnect Clinic could consider:
 
 ```text
 HealthConnect-Appointment-No-Show-Analysis/
-│
+├── data/
+│   └── HealthConnect_Cleaned.csv
 ├── HealthConnect_Appointment_No_Show_Analysis.ipynb
-├── README.md
-└── data/
-    └── HealthConnect_Cleaned.csv
+└── README.md
 ```
 
 > **Note:** This project uses a fictional/anonymised dataset for learning and portfolio purposes. Findings describe observed associations and should not be interpreted as causal or clinical conclusions.
