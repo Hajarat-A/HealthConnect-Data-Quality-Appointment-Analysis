@@ -1,240 +1,244 @@
-# HealthConnect Clinic — Data Quality Assessment & Appointment No-Show Analysis
+# HealthConnect Clinic — Appointment No-Show & Data Quality Analysis
 
 ## Project Overview
 
-This project assesses and analyses appointment data from **HealthConnect Clinic**, a fictional and anonymised healthcare dataset containing **5,000 appointment records and 18 variables**.
+This project analyses appointment data from **HealthConnect Clinic**, a fictional and anonymised healthcare dataset containing **5,000 appointment records and 18 variables**.
 
-The project combines **data quality assessment, data cleaning, validation, exploratory analysis and business interpretation** to investigate factors associated with appointment no-shows.
+The project places a strong focus on **data quality assessment and cleaning before analysis**. The dataset was systematically reviewed for completeness, consistency, validity, duplicate records, incorrect values and potential outliers.
 
-The dataset was assessed for completeness, consistency, validity and potential data-quality issues before being used for analysis. Cleaning and validation decisions were documented to support a reliable and reproducible analytical dataset.
+After establishing that the data was suitable for analysis, the cleaned dataset was used to investigate patterns associated with appointment no-shows and identify areas where appointment management could be improved.
 
 ---
 
 ## Business Question
 
-**What factors are associated with appointment no-shows at HealthConnect Clinic, and where can appointment management be improved?**
+**What factors are associated with appointment no-shows, and where can appointment management be improved?**
 
 ---
 
-## Dataset
+# Data Quality Assessment and Cleaning
 
-* **Original records:** 5,000
-* **Final cleaned records:** 4,850
-* **Variables:** 18
+Data quality was assessed before conducting the analysis to ensure the dataset was **complete, consistent, valid and suitable for reporting**.
 
-Key variables include:
+The cleaning process included:
 
-* Age and gender
-* Appointment type
-* Appointment day and time
-* Booking lead time
-* Previous appointments
-* Previous no-shows
-* Distance to clinic
-* Waiting time
-* Reminder activity
-* Appointment outcome
+* Assessing missing values across all columns.
+* Checking for duplicate records.
+* Checking for duplicate appointment IDs.
+* Reviewing data types and converting date fields where required.
+* Validating booking and appointment dates.
+* Checking booking lead time against the difference between booking and appointment dates.
+* Reviewing categorical values for consistency.
+* Validating age groups against recorded ages.
+* Checking numerical fields for plausible ranges.
+* Identifying and reviewing potential outliers using the IQR method.
+* Reviewing relationships between related fields for inconsistencies.
 
----
+### Missing-Value Assessment
 
-## Data Quality Assessment
+Three fields contained missing values:
 
-Before analysing appointment outcomes, the dataset was reviewed across several data-quality areas:
+| Field                   | Missing Records | Treatment                   |
+| ----------------------- | --------------: | --------------------------- |
+| `reminder_channel`      |           1,366 | Recorded as **No Reminder** |
+| `distance_to_clinic_km` |              90 | Records removed             |
+| `waiting_time_minutes`  |              60 | Records removed             |
 
-* **Completeness** — identification and assessment of missing values
-* **Uniqueness** — duplicate record and appointment ID checks
-* **Validity** — data types, numerical ranges and date values
-* **Consistency** — categorical values and related fields
-* **Cross-field validation** — checking whether related fields agreed with each other
-* **Derived-field validation** — validating calculated or grouped fields against their source data
-* **Outlier assessment** — identifying unusual numerical observations and reviewing whether they represented potential errors or plausible values
+The **1,366 missing reminder-channel values** were investigated rather than automatically removed. They corresponded to appointments where **no reminder had been sent**, so the missing values were recorded as **No Reminder**.
 
-The objective was not simply to remove unusual records, but to assess whether each issue represented a genuine data-quality problem and document the reasoning behind the cleaning decision.
-
----
-
-## Data Quality Issues Identified
-
-The initial dataset contained missing values in three areas:
-
-| Variable           | Missing Records |
-| ------------------ | --------------: |
-| Reminder channel   |           1,366 |
-| Distance to clinic |              90 |
-| Waiting time       |              60 |
-
-### Reminder Channel
-
-The 1,366 missing reminder-channel values were investigated against the reminder-status field.
-
-The records corresponded to appointments where **no reminder had been sent**. Rather than treating these values as unknown, they were standardised as **No Reminder**, providing a meaningful category for analysis.
-
-### Distance and Waiting Time
-
-There were:
-
-* **90 records** with missing distance-to-clinic values
-* **60 records** with missing waiting-time values
-
-These **150 records were removed** because both variables were used in the analysis and their missing values could not be reliably determined from the available dataset.
-
-After cleaning, the final dataset contained **4,850 appointment records**.
-
----
-
-## Data Validation
-
-Several validation checks were performed after cleaning to assess whether important fields were internally consistent.
-
-### Date Validation
-
-Booking dates and appointment dates were converted to appropriate datetime formats.
-
-The analysis confirmed that there were **no appointments with an appointment date earlier than the booking date**.
-
-The existing `booking_lead_days` field was also compared with the difference between `appointment_date` and `booking_date`. The validation identified **no discrepancies**.
-
-### Age Group Validation
-
-The `age_group` field was compared against the recorded patient age.
-
-The validation identified **no mismatches**, confirming that the assigned age groups were consistent with the underlying age values.
-
-### Categorical Validation
-
-Categorical fields were reviewed for unexpected or inconsistent values, including:
-
-* Gender
-* Age group
-* Appointment type
-* Appointment day
-* Reminder status
-* Reminder channel
-* Appointment outcome
-
-No unexpected categorical values were identified during this validation.
+The 90 records missing distance information and 60 records missing waiting-time information were removed because these fields were used in the analysis and the missing values could not be reliably determined.
 
 ### Duplicate Checks
 
-The dataset was reviewed for duplicate records and duplicate appointment identifiers.
+The dataset was checked for duplicate records and duplicate appointment IDs.
 
-### Numerical and Outlier Review
+No full duplicate records were identified, and there were no duplicate appointment IDs.
 
-Numerical variables were reviewed using descriptive statistics and IQR-based outlier checks.
+Repeated `patient_id` values were retained because a patient can legitimately have multiple appointments.
 
-For example, **147 distance observations** were identified above the calculated upper IQR boundary.
+### Date Validation
 
-These observations were reviewed rather than automatically removed. The recorded distances remained within a plausible range, so they were retained as unusual but potentially valid observations.
+The booking and appointment date fields were converted to the appropriate date format and checked for consistency.
 
-This demonstrates the distinction between **an unusual value and a confirmed data error**.
+The analysis confirmed that:
+
+* Booking dates occurred before appointment dates.
+* Booking lead time was consistent with the difference between booking and appointment dates.
+* No booking lead-time discrepancies were identified.
+
+### Categorical Validation
+
+Categorical fields were reviewed for inconsistent or unexpected values.
+
+The `age_group` field was also checked against the recorded `age` values to ensure that patients were assigned to the appropriate age group.
+
+### Numerical Validation
+
+Numerical fields were reviewed for plausible values and unexpected entries.
+
+The following ranges were checked:
+
+* Age: **18–80 years**
+* Booking lead time: **0–60 days**
+* Previous appointments: **0–11**
+* Previous no-shows: **0–5**
+* Distance to clinic: **0.5–45 km**
+* Waiting time: **2–68 minutes**
+
+No clearly invalid numerical values were identified.
+
+### Outlier Assessment
+
+Potential outliers were reviewed using the **IQR method**.
+
+Distance to the clinic had **147 values above the calculated upper IQR boundary of 25.80 km**.
+
+These records were not automatically removed because the distances were unusual but still considered **plausible values rather than confirmed data-entry errors**.
+
+Age did not contain IQR outliers.
+
+### Final Dataset
+
+After the data quality assessment and cleaning process:
+
+**Original dataset:** 5,000 records × 18 variables
+**Final dataset:** 4,850 records × 18 variables
+
+The cleaned dataset was then used for the exploratory and deeper analysis.
 
 ---
 
-## Exploratory Data Analysis
+# Exploratory Analysis
 
-After the data quality and validation stage, the final dataset of **4,850 records** was analysed to identify patterns in appointment outcomes.
+The cleaned dataset was analysed to identify patterns associated with appointment no-shows.
 
-### Key Findings
+The main findings were:
 
-* **No-Show** was the most common appointment outcome at **48.23%**.
-* **Booking lead time** showed the largest observed difference in no-show rates.
-* No-show rates increased from **27.14%** for appointments booked 0–7 days ahead to **60.31%** for appointments booked 31–60 days ahead.
-* **Distance to the clinic** showed an overall increasing pattern in no-show rates across longer distance bands.
-* Patients with a greater history of **previous no-shows** generally had higher no-show rates.
+* **48.23%** of appointments were no-shows.
+* Appointments booked **0–7 days in advance** had a no-show rate of **27.14%**.
+* Appointments booked **31–60 days in advance** had a no-show rate of **60.31%**.
+* Previous no-show history was associated with higher no-show rates.
+* Longer travel distances also showed higher no-show rates.
 * Reminder activity showed a smaller difference in no-show rates compared with booking lead time.
 
 ---
 
-## Deeper Analysis
+# Main Finding — Booking Lead Time
 
-Booking lead time was selected for deeper analysis because it showed the largest and most consistent difference in the initial comparisons.
+Booking lead time showed the clearest difference in no-show rates among the factors examined.
 
-Appointments booked **31–60 days in advance** had a **60.31% no-show rate**.
+Appointments booked **31–60 days in advance** had a no-show rate of **60.31%**, compared with **27.14%** for appointments booked **0–7 days in advance**.
 
-Within this group, previous no-show history was examined further.
+This represents a **33.17 percentage-point difference**, making booking lead time the main factor selected for deeper analysis.
+
+---
+
+# Deeper Analysis
+
+The analysis was narrowed to appointments booked **31–60 days in advance**, as this group had the highest no-show rate.
+
+Within this group, previous no-show history showed a further pattern.
 
 Patients with **two previous no-shows** had a **70.33% no-show rate across 182 appointments**.
 
-This subgroup was examined to determine whether previous attendance history provided additional context within the long-lead-time group.
+The outcomes within this group were:
+
+* **70.33% No-Show**
+* **25.27% Attended**
+* **4.40% Cancelled**
+
+Further analysis of distance and reminder activity within this group did not show a consistent or substantial additional pattern. Therefore, previous no-show history remained the clearest characteristic within the selected high-risk group.
 
 ---
+
+# Cause, Effect, Business Impact and Recommendations
+
+## Cause
+
+A possible reason for the higher no-show rate among appointments booked further in advance is that patients may **forget their appointment or have their plans change** before the appointment date.
+
+Previous no-show history may indicate ongoing attendance difficulties, while longer travel distances may create additional access or transport challenges.
+
+Further information, such as reminder timing, confirmation responses and reasons for missed appointments, could help the clinic better understand these patterns.
+
+## Effect
+
+Of the **2,353 appointments** booked 31–60 days in advance, **1,419 were no-shows**, representing **60.31%**.
+
+Patients with previous no-shows also had higher subsequent no-show rates.
 
 ## Business Impact
 
-Of the **2,353 appointments** booked 31–60 days in advance, **1,419 were recorded as no-shows**.
+High levels of non-attendance can reduce the number of appointments the clinic is able to effectively use and make scheduling less predictable.
 
-If a similar pattern continues, unused appointment capacity may contribute to scheduling inefficiencies and reduce the number of appointments that can be effectively delivered.
-
-The findings identify an area for further investigation and targeted appointment-management strategies. They describe **observed associations rather than proven causal relationships**.
-
----
+Missed appointments may also create additional administrative work and reduce the availability of appointment times for other patients.
 
 ## Recommendations
 
-HealthConnect Clinic could consider:
+Based on the analysis, HealthConnect could consider:
 
-* Reviewing appointments booked further in advance.
-* Providing targeted follow-up for patients with previous no-show history.
-* Reviewing reminder timing and confirmation processes for longer-lead appointments.
-* Considering travel distance when managing appointment attendance.
-* Continuing appointment reminders as part of appointment management.
+1. **Targeted follow-up:** Review appointments booked 31–60 days in advance and consider confirmation or reminder follow-ups closer to the appointment date.
 
-Further operational data, such as reminder timing, confirmation responses and recorded reasons for non-attendance, could be used to investigate the possible causes of the observed patterns.
+2. **Previous no-show history:** Consider additional follow-up for patients with previous no-shows, particularly those with two or more previous no-shows.
 
----
+3. **Distance and access:** Review whether patients travelling longer distances experience access or transport barriers.
 
-## Tools
+4. **Reminder process:** Continue using appointment reminders while reviewing reminder timing and confirmation responses.
 
-* Python
-* Pandas
-* Matplotlib
-* Seaborn
-* SQL
-* Jupyter Notebook
+5. **Further data collection:** Record reasons for missed appointments and other relevant information to support further investigation of attendance patterns.
 
 ---
 
-## Project Workflow
+# SQL Analysis
 
-**Data Quality Assessment → Data Cleaning → Data Validation → Exploratory Data Analysis → Pattern Identification → Deeper Analysis → Business Impact → Recommendations**
+SQL was used to further explore appointment outcomes and validate key findings from the Python analysis.
+
+The SQL analysis included:
+
+* Overall no-show rate.
+* No-show count by appointment type.
+* Appointment outcome distribution.
+
+The SQL results were consistent with the Python analysis.
 
 ---
 
-## Project Structure
+# Tools
 
-```text
-HealthConnect-Data-Quality-Appointment-Analysis/
+* **Python**
+* **Pandas**
+* **Matplotlib**
+* **Seaborn**
+* **SQL**
+* **Jupyter Notebook**
+
+---
+
+# Project Workflow
+
+**Data Quality Assessment → Data Cleaning → Data Validation → Exploratory Analysis → Identify Patterns → Deeper Analysis → Business Impact → Recommendations**
+
+---
+
+# Project Structure
+
+``` 
+HealthConnect-Clinic/
+│
 ├── data/
 │   └── HealthConnect_Cleaned.csv
-├── HealthConnect_Data_Quality_Appointment_Analysis.ipynb
+│
+├── HealthConnect_Appointment_No_Show_Analysis.ipynb
+│
+├
+│
 └── README.md
 ```
 
 ---
 
-## Data Quality Skills Demonstrated
+# GitHub Repository
 
-This project demonstrates practical experience with:
+The complete project, including the analysis notebook, cleaned dataset and supporting SQL analysis, is available here:
 
-* Missing-data assessment
-* Data completeness checks
-* Duplicate and uniqueness checks
-* Data-type validation
-* Date validation
-* Cross-field validation
-* Derived-field validation
-* Categorical consistency checks
-* Numerical range assessment
-* IQR-based outlier identification
-* Data-cleaning decision documentation
-* Validation before analysis
-* Reproducible analysis using Python and SQL
-* Translating validated data into business insights
-
----
-
-## Important Note
-
-This project uses a fictional/anonymised dataset for learning and portfolio purposes.
-
-The findings describe **observed associations within the dataset** and should not be interpreted as causal or clinical conclusions.
+**https://github.com/Hajarat-A/HealthConnect-Clinic**
