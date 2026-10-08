@@ -235,10 +235,4 @@ HealthConnect-Clinic/
 └── README.md
 ```
 
----
 
-# GitHub Repository
-
-The complete project, including the analysis notebook, cleaned dataset and supporting SQL analysis, is available here:
-
-**https://github.com/Hajarat-A/HealthConnect-Clinic**
